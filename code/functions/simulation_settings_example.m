@@ -34,10 +34,6 @@ G = PKPDmodel_d.B;
 H = PKPDmodel_d.C;
 Ht = H';
 
-% F_aug = [F, zeros(size(F,1), 1); -H, 1]; % Augmenting with integral action
-% G_aug = [G; 0]; % Augmented input matrix
-% H_aug = [H, 0]; % Output matrix stays the same
-
 PKPDpatient = get_PKPDmodel(V1_v,V2_v,V3_v,Cl1_v,Cl2_v,Cl3_v); % true patient model
 PKPDpatient_d = c2d(PKPDpatient,h); % discretization of model
 
@@ -46,17 +42,11 @@ F_true = PKPDpatient_d.A;
 G_true = PKPDpatient_d.B;
 H_true = PKPDpatient_d.C;
 
-% F_true_aug = [F_true, zeros(size(F_true,1), 1); -H_true, 1]; % Augmenting with integral action
-% G_true_aug = [G_true; 0]; % Augmented input matrix
-% H_true_aug = [H_true, 0]; % Output matrix stays the same
-
 n = size(F,1);
-
-% x0 = zeros(n,1); % Initial state
 
 %% Disturbances time
 
-distsize = 20; % optimization fails at 20 (15 works)
+distsize = 20; % [BIS]
 
 t1 = 30*60; % start time
 t2 = 35*60; % end time
@@ -67,8 +57,6 @@ t4 = 55*60;
 %% Average Hill function values (vanluchene)
 gamma_vl = 2.69;
 Ce50_vl = 4.92;
-% Emax_vl = 87.5;
-% Ce50gammamod = 72.6752;
 E0_vl = 95.9;
 
 %% reference values
@@ -92,8 +80,6 @@ Hfilter = c2d(Gf,h);
 [num, den] = tfdata(Hfilter, 'v');
 
 reference = filter(num, den, reference_unfiltered); % filtered reference
-
-% CeMax = computeeffectconc(40,Ce50,E0,gammahill);
 
 %% quadprog settings
 

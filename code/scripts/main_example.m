@@ -16,7 +16,7 @@ Rmin = 0;
 Rmax = 1;
 Q = 1*eye(4);
 
-addednoise = 1; % no added noise
+addednoise = 1; % added noise
 
 [t, trueDOH, ymeas, ykalman, sqi, u] = simulate_example(Rmin,Rmax,Q,addednoise);
 
@@ -52,13 +52,16 @@ ylim([0,100])
 
 rng(1) % For reproducibility (other seed than for later simulations)
 
-% Initial guesses from Kalman paper
-Rminguess = 1.3277e+04;
-Rmaxguess = 9.8734e+06;
-Qvec = 1.0e+06*[0.0047,0.1149,5.8082,0.0034]';
+% Initial guesses from Kalman paper (these are not from the Kalman paper?!)
+% Rminguess = 1.3277e+04;
+% Rmaxguess = 9.8734e+06;
+% Qvec = 1.0e+06*[0.0047,0.1149,5.8082,0.0034]';
+Rminguess = 0.771;
+Rmaxguess = 1.79;
+Qvec = [0.0579, 0.0183, 0.027, 0.000212]';
 v0 = [Rminguess;Rmaxguess;Qvec];
 
-options = optimoptions('fmincon','Display','iter');
+options = optimoptions('fmincon','Display','iter','MaxIterations',50);
 
 A = -1*eye(6); % Ax <= b -> x >= 0
 b = zeros(6,1);
@@ -71,74 +74,52 @@ Rminopt = optimalvec(1)
 Rmaxopt = optimalvec(2)
 Qopt = optimalvec(3:6).*eye(4)
 
-%% Compute MSE for both added
-
-% Without noise
-% Rminopt =
-%    6.0537e+04
-% 
-% Rmaxopt =
-%    9.8856e+06
-% 
-% Qopt =
-%    1.0e+06 *
-%     0.0000         0         0         0
-%          0    0.0000         0         0
-%          0         0    5.8034         0
-%          0         0         0    0.0584
-% 
-% fval =
-%    10.7689
+%% Compute MSE for the optimal values obtained
 
 % With noise
 % Rminopt =
-%    6.0537e+04
+%    273.6357
 % Rmaxopt =
-%    9.8856e+06
+%    19706
 % Qopt =
-%    1.0e+06 *
-% 
-%     0.0000         0         0         0
-%          0    0.0000         0         0
-%          0         0    5.8034         0
-%          0         0         0    0.0584
+%     0.8543         0       0         0
+%          0    0.83         0         0
+%          0         0    2.4601*10^4   0
+%          0         0         0    0.142*10^4
 % fval =
 %    10.7689
-
-% NOTE: These values were forgotten to be added to the final manuscript in
-% the results!
 
 v = [Rminopt;Rmaxopt;diag(Qopt)];
 computeMSEexample(v) % sum mse
 
 %% Simulate with optimal RQ 
 
-[t, trueDOH, ymeas, ykalman, sqi, u] = simulate_kalman_RQ_example(Rminopt,Rmaxopt,Qopt,addednoise);
+[t, trueDOH, ymeas, ykalman, sqi, u] = simulate_example(Rminopt,Rmaxopt,Qopt,addednoise);
 
 % Plot results
 figure(1)
 subplot(4,1,1)
-plot(t./60,u_d1)
+plot(t./60,u)
 xlabel('Time (min)')
 ylabel('Dose (mg/s)')
 title('u')
 
 subplot(4,1,2)
-plot(t./60,trueDOH_d1)
+plot(t./60,trueDOH)
 xlabel('Time (min)')
 ylabel('DoH (BIS)')
 title('True DoH in patient')
 ylim([0,100])
 
 subplot(4,1,3)
-plot(t./60,ymeas_d1)
+plot(t./60,ymeas)
 xlabel('Time (min)')
 ylabel('Measurement (BIS)')
 title('Measurement (BIS)')
 ylim([0,100])
 
 subplot(4,1,4)
-plot(t./60,ykalman_d1)
+plot(t./60,ykalman)
 xlabel('Time (min)')
 ylabel('Kalman prediction (BIS)')
 title('Kalman prediction (BIS)')

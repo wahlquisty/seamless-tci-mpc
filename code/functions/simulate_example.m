@@ -25,7 +25,7 @@ simulation_settings_example; % get simulation settings
 
 SQIstep = 50 ; % Step size for SQI (100->SQIstep)
 sqi = 100*ones(N,1);
-sqi(td3/h+2:td4/h+1) = SQIstep; % index is off by one
+sqi(t3/h+2:t4/h+1) = SQIstep; % index is off by one
 
 %% Initialize states, u and y
 
@@ -97,11 +97,11 @@ for i = 1:N
 
    % Add disturbances
      % disturbance affecting DOH
-        if t(i) == td1
+        if t(i) == t1
             doh = doh_beforedist + distsize; % add first disturbance to output from PD model
             Ce_dist = computeeffectconc(doh,Ce50,E0,gammahill);
             x_(4) = Ce_dist;  % patient new affected fourth state
-        elseif t(i) == td2
+        elseif t(i) == t2
             doh = doh_beforedist - distsize; % add first disturbance to output from PD model
             Ce_dist = computeeffectconc(doh,Ce50,E0,gammahill);
             x_(4) = Ce_dist;   % patient new affected fourth state
@@ -110,7 +110,7 @@ for i = 1:N
         end
      % disturbance affecting measurement
         % doh = doh_beforedist;
-        if t(i) >= td3 && t(i) < td4
+        if t(i) >= t3 && t(i) < t4
             bis_meas = doh + distsize; % add first disturbance to output from PD model
         else
             bis_meas = doh;
@@ -123,8 +123,8 @@ for i = 1:N
 
         % delay measurement when signal quality is low
         delay = (1-sqi(i)/100)*maxdelay; % compute delay from SQI. Create
-        if (t(i) >= td3 + 1) && (t(i) < td3+1+delay) % signal is fixed for some time that depends on the sqi
-            ymonitor = monitorBIS(td3/h+1);
+        if (t(i) >= t3 + 1) && (t(i) < t3+1+delay) % signal is fixed for some time that depends on the sqi
+            ymonitor = monitorBIS(t3/h+1);
         else
             ymonitor = ymeas(i-delay/h); %trueDOH(i-delay); Ska det stå ymeas här?
         end
